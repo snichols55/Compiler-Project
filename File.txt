@@ -1,0 +1,11 @@
+public class Test{
+public static void main(String[] args){
+int[] myArray = new int[10];
+int a = 3;
+int l = 14;
+a = a + l;
+while(i < j){
+int x = 0;
+}
+System.out.println(x);
+}
