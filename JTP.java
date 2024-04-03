@@ -1,3 +1,4 @@
+package MavenCompiler.MavenCompiler;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +22,7 @@ public class JTP {
 				Scanner inp = new Scanner(System.in);
 				System.out.println("Enter file name followed by .txt");
 				String fileName = inp.next();
+				System.out.println(correctSemantics(fileName));
 				toPython(fileName);
 				 }
 			else if(op == 0) {
@@ -111,23 +113,43 @@ public class JTP {
 	}
 
   private boolean correctSemantics(String filename) throws IOException {
-      String type = null;
+      //String type = null;
+      Map<String, String> variableTypes = new HashMap<>();
+      Set<String> variablesInMathOperations = new HashSet<>();
       try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
           String line;
           while ((line = br.readLine()) != null) {
-              Matcher matcher = Pattern.compile("\\s*(\\w+)\\s+(\\w+)\\s*=.*;").matcher(line);
+              // Regular expression to match variable declarations
+              Matcher matcher = Pattern.compile("\\b(\\w+)\\b\\s+(\\w+)\\s*=.*;").matcher(line);
               if (matcher.find()) {
                   String variableType = matcher.group(1);
                   String variableName = matcher.group(2);
-
-                  if (type == null) {
-                      type = variableType;
-                  } else if (!type.equals(variableType)) {
-                      return false; 
+                  variableTypes.put(variableName, variableType);
+              }
+          }
+      }
+      try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+          String line;
+          while ((line = br.readLine()) != null) {
+              Matcher matcher = Pattern.compile("\\b\\w+\\b").matcher(line); // Match word boundaries
+              while (matcher.find()) {
+                  String variableName = matcher.group();
+                  if (line.contains("+") || line.contains("-") || line.contains("*") || line.contains("/") || line.matches("\\s*\\w+\\s*=\\s*.*")) {
+                      // If the line contains a mathematical operation, add the variable to the set
+                      variablesInMathOperations.add(variableName);
                   }
               }
           }
       }
+          String commonType = null;
+          for (String variable : variablesInMathOperations) {
+              String type = variableTypes.get(variable);
+              if (commonType == null) {
+                  commonType = type;
+              } else if (!commonType.equals(type)) {
+                  return false; // Different types found
+              }
+          }
       return true; 
   }
 public boolean checkBrackets(String fileName){
