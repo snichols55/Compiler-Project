@@ -131,7 +131,7 @@ public class JTP {
       try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
           String line;
           while ((line = br.readLine()) != null) {
-              Matcher matcher = Pattern.compile("\\b\\w+\\b").matcher(line); // Match word boundaries
+              Matcher matcher = Pattern.compile("\\b\\w+(\\.\\d+)?(?:\\d+)?\\b").matcher(line); // Match word boundaries
               while (matcher.find()) {
                   String variableName = matcher.group();
                   if (line.contains("+") || line.contains("-") || line.contains("*") || line.contains("/") || line.matches("\\s*\\w+\\s*=\\s*.*")) {
@@ -144,6 +144,14 @@ public class JTP {
           String commonType = null;
           for (String variable : variablesInMathOperations) {
               String type = variableTypes.get(variable);
+              if(variable.matches("\\d+")){
+            	  type = "int";
+              }
+              if(variable.matches("-?\\d+(\\.\\d+)")){
+            	  type = "double";
+              }
+              //System.out.println("Type: "+ type);
+              //System.out.println("Var: "+variable);
               if (commonType == null) {
                   commonType = type;
               } else if (!commonType.equals(type)) {
