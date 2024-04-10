@@ -1,4 +1,3 @@
-package MavenCompiler.MavenCompiler;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +21,7 @@ public class JTP {
 				Scanner inp = new Scanner(System.in);
 				System.out.println("Enter file name followed by .txt");
 				String fileName = inp.next();
-				System.out.println(correctSemantics(fileName));
+				//System.out.println(correctSemantics(fileName));
 				toPython(fileName);
 				 }
 			else if(op == 0) {
@@ -35,20 +34,25 @@ public class JTP {
 	}
 	public String toPython(String fileName) throws IOException {
 		String python = "";
-		if(correctSyntax(fileName) == true && correctSemantics(fileName) == true && checkBrackets(fileName) ==true) {
-	
+		try {
+	        FileReader fileReader = new FileReader(fileName);
+	        BufferedReader bufferedReader = new BufferedReader(fileReader);
+	        String line;
+	       while ((line = bufferedReader.readLine()) != null) {
+	    	   //System.out.println(correctSyntax(line));
+		if(correctSyntax(line) == false) {
+			System.out.println(line);
+		}
+	       }
+		}catch (IOException e) {
+	           System.out.println("An error occurred while reading the file: " + e.getMessage());  
 		}
 		return python;
 	}
 	public String Expected() {
 		return "";
 	}
-	public boolean correctSyntax(String fileName) {
-		try {
-	        FileReader fileReader = new FileReader(fileName);
-	        BufferedReader bufferedReader = new BufferedReader(fileReader);
-	        String line;
-	       while ((line = bufferedReader.readLine()) != null) {
+	public boolean correctSyntax(String line) {
 		for(int i =0; i < line.length(); i++) {
 			if(line.contains("System.out.println(")) {
 				String pattern = "System\\.out\\.(println|print)\\(\\s*\"(.*?)\"(\\s*\\+\\s*\\w+)*\\s*\\);";
@@ -82,6 +86,16 @@ public class JTP {
 			}
 			//variable
 			if(line.matches("\\s*\\w+\\s+\\w+\\s*=\\s*.*?;")) {
+				if(line.contains("String")) {
+					if(line.matches("\\bString\\s+[a-zA-Z_$][a-zA-Z_$0-9]*\\s*=\\s*\".*\"\\s*;") == false) {
+						return false;
+					}
+				}
+				if(line.contains("char")) {
+					if(line.matches("\\bchar\\s+[a-zA-Z_$][a-zA-Z_$0-9]*\\s*=\\s*'.*'\\s*;") == false) {
+						return false;
+					}
+				}
 				return true;
 			}
 			//if
@@ -101,14 +115,10 @@ public class JTP {
 				return true;
 			}
 			//variable math
-			if(line.matches("\\s*\\w+\\s*[+\\-*/]\\s*\\w+\\s*")) {
+			if(line.matches("\\b[a-zA-Z_$][a-zA-Z_$0-9]*\\s*=\\s*[\\w+\\-*/()]+\\s*;")) {
 				return true;
 			}
 		}
-		}
-	       }catch (IOException e) {
-	           System.out.println("An error occurred while reading the file: " + e.getMessage());  
-	   }
 		return false;
 	}
 
@@ -150,8 +160,8 @@ public class JTP {
               if(variable.matches("-?\\d+(\\.\\d+)")){
             	  type = "double";
               }
-              //System.out.println("Type: "+ type);
-              //System.out.println("Var: "+variable);
+              System.out.println("Type: "+ type);
+              System.out.println("Var: "+variable);
               if (commonType == null) {
                   commonType = type;
               } else if (!commonType.equals(type)) {
